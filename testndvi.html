@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NDVI Display</title>
+    <style>
+        #canvas {
+            border: 1px solid black;
+            image-rendering: pixelated;
+        }
+        #info {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div id="info">Hover over the image to see NDVI value.</div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        const info = document.getElementById('info');
+
+        img.src = '020240409112429GNDVI_1.jpg';  // 请替换为你图片的实际路径
+        img.onload = function() {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+
+            // 获取图像像素数据
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const pixels = imageData.data;
+
+            canvas.addEventListener('mousemove', function(event) {
+                const rect = canvas.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+
+                // 获取对应像素的索引
+                const index = (Math.floor(y) * canvas.width + Math.floor(x)) * 4;
+
+                // 获取R和G通道（假设RGB图像）
+                const r = pixels[index];
+                const g = pixels[index + 1];
+
+                // 将16位无符号整数值转为NDVI
+                const pixel_value = r * 256 + g;
+                const ndvi = (pixel_value * 2 / 65535) - 1;
+
+                // 显示NDVI值
+                info.textContent = `NDVI Value at (${Math.floor(x)}, ${Math.floor(y)}): ${ndvi.toFixed(4)}`;
+            });
+        };
+    </script>
+</body>
+</html>
